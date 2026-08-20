@@ -1,0 +1,61 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: api_postgres_ej
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pg_data_ej:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "${DB_PORT}:5432"
+    networks:
+      - api_network_ej
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: api_node_ej
+    restart: always
+    ports:
+      - "${API_PORT}:3000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      PORT: 3000
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - api_network_ej
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_ej
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    depends_on:
+      - db
+    networks:
+      - api_network_ej
+
+volumes:
+  pg_data_ej:
+
+networks:
+  api_network_ej:
+    driver: bridge
