@@ -1,0 +1,46 @@
+# Escenario 1 - Ejercicio: WordPress + MariaDB + phpMyAdmin
+
+Stack de WordPress usando MariaDB como base de datos y phpMyAdmin para administrarla,
+con variables de entorno externas y volúmenes/redes con nombre personalizado.
+
+## Servicios
+
+- **db**: MariaDB 10.11
+- **wordpress**: WordPress (última versión)
+- **phpmyadmin**: phpMyAdmin para administrar la base de datos
+
+## Requisitos previos
+
+Antes de levantar la pila, crea un archivo `.env` en esta misma carpeta con estas variables:
+DB_ROOT_PASSWORD=root12345
+DB_NAME=wordpress
+DB_USER=wpuser
+DB_PASSWORD=wp12345
+
+## Cómo levantar la pila
+
+```bash
+docker-compose up -d
+```
+
+Espera unos segundos a que los contenedores arranquen (MariaDB tarda un poco en inicializar
+la primera vez).
+
+## Acceso
+
+| Servicio    | URL                          | Credenciales                          |
+|-------------|-------------------------------|----------------------------------------|
+| WordPress   | http://localhost:8080         | Se configuran en el instalador web    |
+| phpMyAdmin  | http://localhost:8081         | Usuario: `wpuser` / Password: `wp12345` (o `root` / `root12345`) |
+
+## Detener la pila
+
+```bash
+docker-compose down       # detiene contenedores, conserva los volúmenes
+docker-compose down -v    # detiene y borra también los volúmenes (pierdes los datos)
+```
+
+## Volumen y red personalizados
+
+- Volumen: `mi_wordpress_data` (persistencia de la base de datos)
+- Red: `mi_red_wordpress` (comunicación entre los tres servicios)
